@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import { styled as muistyled } from '@mui/material/styles';
 
@@ -13,6 +13,8 @@ import FormLabel from '@mui/material/FormLabel';
 import Input from '@mui/material/Input';
 import FormHelperText from '@mui/material/FormHelperText';
 import InputAdornment from '@mui/material/InputAdornment';
+
+import Button from '@mui/material/Button';
 
 import CalculateIcon from '@mui/icons-material/Calculate';
 
@@ -148,6 +150,11 @@ const TransfusionTypeFormControl = styled(FormControl)`
   }
 `;
 
+const WeightInGrams = styled.div`
+  margin-top: .5vh;
+  font-size: 0.85rem;
+`;
+
 const Specs = styled.div`
   height: 100%; 
   background-color: rgba(0,0,0,0.025);
@@ -177,18 +184,13 @@ const Results = styled.div`
   justify-content: center;
 `;
 
-const ResultsTitle = styled.h3`
-  font-size: 2rem;
-  margin-bottom: 7.5vh;
-`;
-
 const ResultsLabelAndNumber = styled.div`
   text-align: center;
   margin: 5vh 0;
 `;
 
 const ResultsLabel = styled.div`
-  color: #536E99;
+  color: black;
   font-size: 1.25rem;
 `;
 
@@ -211,7 +213,9 @@ const About = styled.div`
   justify-content: space-around;
 `;
 
-const AboutText = styled.div``;
+const AboutText = styled.div`
+  line-height: 3.5vh;
+`;
 
 const ReferenceAndLink = styled.div``;
 
@@ -220,38 +224,153 @@ const Link = styled.a`
   color: #536E99;
 `;
 
-export const Calculator = () => {
-  const [value, setValue] = useState(0); // state for tabs
-  
-  const [personType, setPersonType] = useState('male'); // states for options
-  const [transfusionType, setTransfusionType] = useState('therapeutic');
+const CustomButton = styled(Button)`
+  && {
+    color: black;
+    border-color: black;
+    margin-bottom: 5vh;
+    :hover {
+      color: black;
+      border-color: black;
+      background-color: rgba(0,0,0,0.025);
+    }
+  }
+`;
 
-  const [plateletCount, setPlateletCount] = useState(""); // states for volume.specs
+export const Calculator = () => {
+  const [value, setValue] = useState(0); 
+  
+  const [personType, setPersonType] = useState("male"); 
+  const [transfusionTypeVolume, setTransfusionTypeVolume] = useState("therapeutic");
+  const [transfusionTypeYield, setTransfusionTypeYield] = useState("standard");
+
+  const [plateletCount, setPlateletCount] = useState(""); 
   const [volumeWeight, setVolumeWeight] = useState("");
   const [efficiency, setEfficiency] = useState("");
 
-  const [prePlateletCount, setPrePlateletCount] = useState(""); // states for yield.specs
+  const [prePlateletCount, setPrePlateletCount] = useState(""); 
   const [postPlateletCount, setPostPlateletCount] = useState(""); 
   const [yieldWeight, setYieldWeight] = useState("");
-  const [height, setHeight] = useState("");
-  const [volume, setVolume] = useState("");
+  let [height, setHeight] = useState("");
+  let [volume, setVolume] = useState("");
 
-  // useEffect(() => {
-  //   console.log(prePlateletCount, postPlateletCount, yieldWeight, height, volume);
-  // }, [prePlateletCount, postPlateletCount, yieldWeight, height, volume])
+  const [standardResult, setStandardResult] = useState("");
+  const [apheresisResult, setApheresisResult] = useState("");
 
-  // eventhandler for tabs
+  const [yieldResult, setYieldResult] = useState("");
+  const [cciResult, setCciResult] = useState("");
+
   const handleTabChange = (event, newValue) => {
     setValue(newValue);
   };
 
-  // eventhandler for volume.options
   const handlePersonTypeChange = (event, newValue) => {
     setPersonType(newValue);
   };
-  const handleTransfusionTypeChange = (event, newValue) => {
-    setTransfusionType(newValue);
-  };
+
+  const handleTransfusionTypeChangeVolume = (event, newValue) => {
+    setTransfusionTypeVolume(newValue);
+  };  
+
+  const handleTransfusionTypeChangeYield = (event, newValue) => {
+    setTransfusionTypeYield(newValue);
+  };  
+
+  let bloodVolumeVolume = 0; 
+  let bloodVolumePerKg = 0;
+  let plateletCountDesired = 0; 
+  let differencePlateletCountVolume = 0; 
+
+  const volumeCalculateAndShow = () => {
+    let plateletCountTimesThousand = parseInt(plateletCount) * 1000; 
+    let volumeCalcWeight = parseInt(volumeWeight);
+    let increment = parseInt(efficiency) / 100;
+    
+    if (transfusionTypeVolume === "therapeutic") {
+      plateletCountDesired = 100000;
+    } 
+    if (transfusionTypeVolume === "profilatic") {
+      plateletCountDesired = 50000;
+    }
+    
+    differencePlateletCountVolume = plateletCountDesired - plateletCountTimesThousand;
+
+    if (personType === "newborn" || personType === "premature") {
+      volumeCalcWeight = volumeCalcWeight / 1000;
+    }
+
+    if (personType === "male") {
+      bloodVolumePerKg = 75;
+    } else if (personType === "female") {
+      bloodVolumePerKg = 65;
+    } else if (personType === "newborn") {
+      bloodVolumePerKg = 90;
+    } else {
+      bloodVolumePerKg = 110;
+    }
+    
+    bloodVolumeVolume = volumeCalcWeight * bloodVolumePerKg 
+
+    let kStandard = 1000000000 * increment;
+    let kApheresis = 1500000000 * increment;
+
+    let temp = differencePlateletCountVolume * bloodVolumeVolume * 1000;
+
+    let finalStandard = temp / kStandard;
+    let finalApheresis = temp / kApheresis;
+
+    setStandardResult(finalStandard);
+    setApheresisResult(finalApheresis);
+  }
+
+  let differencePlateletCountYield = 0; 
+  let bloodVolumeYield = 0; 
+  let typeSorA = 0; 
+  let surface = 0;
+
+  const yieldCalculateAndShow = () => {
+    let yieldCalcWeight = parseInt(yieldWeight);
+
+    differencePlateletCountYield = (postPlateletCount - prePlateletCount) * 1000;
+
+    if (personType === "newborn" || personType === "premature") {
+      yieldCalcWeight = yieldCalcWeight / 1000;
+    }
+
+    if (personType === "male") {
+      bloodVolumePerKg = 75;
+    } else if (personType === "female") {
+      bloodVolumePerKg = 65;
+    } else if (personType === "newborn") {
+      bloodVolumePerKg = 90;
+    } else {
+      bloodVolumePerKg = 110;
+    }
+
+    bloodVolumeYield = yieldCalcWeight * bloodVolumePerKg;
+
+    if (transfusionTypeYield === "standard") {
+      typeSorA = 1000000000;
+    } 
+    if (transfusionTypeYield === "apheresis") {
+      typeSorA = 1500000000;
+    }
+
+    volume = volume * typeSorA;
+
+    let yieldCalc = (differencePlateletCountYield * bloodVolumeYield * 1000) / volume; // rendimento
+
+    surface = 0.007184 * Math.pow(height, 0.725) * Math.pow(yieldWeight, 0.425);
+
+    let cci = (differencePlateletCountYield * surface) / (volume / 100000000000);
+    
+    let finalYield = yieldCalc * 100;
+    
+    let finalCci = cci / 1000;
+
+    setYieldResult(finalYield);
+    setCciResult(finalCci);
+  }
 
   return (
     <Background>
@@ -284,15 +403,16 @@ export const Calculator = () => {
                   <FormControlLabel value="newborn" control={<Radio />} label="Newborn" />
                   <FormControlLabel value="premature" control={<Radio />} label="Premature" />
                 </RadioGroup>
-              </PersonTypeFormControl>              
+              <WeightInGrams>Newborn and premature weight must be in grams.</WeightInGrams>              
+              </PersonTypeFormControl>
               <TransfusionTypeFormControl>
                 <FormLabel id="demo-radio-buttons-group-label">Transfusion Type</FormLabel>
                 <RadioGroup
                   aria-labelledby="demo-radio-buttons-group-label"
                   defaultValue="therapeutic"
-                  value={transfusionType}
+                  value={transfusionTypeVolume}
                   name="radio-buttons-group"
-                  onChange={handleTransfusionTypeChange}
+                  onChange={handleTransfusionTypeChangeVolume}
                 >
                   <FormControlLabel value="therapeutic" control={<Radio />} label="Therapeutic" />
                   <FormControlLabel value="profilatic" control={<Radio />} label="Profilatic" />
@@ -308,6 +428,11 @@ export const Calculator = () => {
                     onChange={e => setPlateletCount(e.target.value)}
                     endAdornment={<InputAdornment position="end">000/mm<sup>3</sup></InputAdornment>}
                     aria-describedby="platelet-count"
+                    onKeyPress={(event) => {
+                        if (!/[0-9]/.test(event.key)) {
+                        event.preventDefault();
+                      }
+                    }}
                     inputProps={{
                       'aria-label': 'platelet-count',
                     }}
@@ -323,6 +448,11 @@ export const Calculator = () => {
                       {personType === 'male' || personType === 'female' ? 'kg' : 'g'}
                     </InputAdornment>}
                     aria-describedby="standard-weight-helper-text"
+                    onKeyPress={(event) => {
+                        if (!/[0-9]/.test(event.key)) {
+                        event.preventDefault();
+                      }
+                    }}
                     inputProps={{
                       'aria-label': 'weight',
                     }}
@@ -336,6 +466,11 @@ export const Calculator = () => {
                     onChange={e => setEfficiency(e.target.value)}
                     endAdornment={<InputAdornment position="end">%</InputAdornment>}
                     aria-describedby="standard-weight-helper-text"
+                    onKeyPress={(event) => {
+                        if (!/[0-9]/.test(event.key)) {
+                        event.preventDefault();
+                      }
+                    }}
                     inputProps={{
                       'aria-label': 'weight',
                     }}
@@ -345,14 +480,14 @@ export const Calculator = () => {
               </FormControlWrapper>
             </Specs>
             <Results>
-              <ResultsTitle>Results</ResultsTitle>
+              <CustomButton variant="outlined" onClick={volumeCalculateAndShow}>Calculate</CustomButton>
               <ResultsLabelAndNumber>
                 <ResultsLabel>Standard/Randomized</ResultsLabel>
-                <ResultsNumber>Insufficient Data</ResultsNumber>
+                <ResultsNumber>{standardResult ? standardResult.toFixed(2) + " ml" : '0 ml'}</ResultsNumber>
               </ResultsLabelAndNumber>
               <ResultsLabelAndNumber>
                 <ResultsLabel>Apheresis/Buffy Coat/Pool</ResultsLabel>
-                <ResultsNumber>Insufficient Data</ResultsNumber>
+                <ResultsNumber>{apheresisResult ? apheresisResult.toFixed(2) + " ml" : '0 ml'}</ResultsNumber>
               </ResultsLabelAndNumber>              
             </Results>
           </Volume>
@@ -374,19 +509,19 @@ export const Calculator = () => {
                   <FormControlLabel value="newborn" control={<Radio />} label="Newborn" />
                   <FormControlLabel value="premature" control={<Radio />} label="Premature" />
                 </RadioGroup>
-              </PersonTypeFormControl>
-              
+                <WeightInGrams>Newborn and premature weight must be in grams.</WeightInGrams>
+              </PersonTypeFormControl>              
               <TransfusionTypeFormControl>
                 <FormLabel id="demo-radio-buttons-group-label">Transfusion Type</FormLabel>
                 <RadioGroup
                   aria-labelledby="demo-radio-buttons-group-label"
-                  defaultValue="therapeutic"
-                  value={transfusionType}
+                  defaultValue="standard"
+                  value={transfusionTypeYield}
                   name="radio-buttons-group"
-                  onChange={handleTransfusionTypeChange}
+                  onChange={handleTransfusionTypeChangeYield}
                 >
-                  <FormControlLabel value="therapeutic" control={<Radio />} label="Therapeutic" />
-                  <FormControlLabel value="profilatic" control={<Radio />} label="Profilatic" />
+                  <FormControlLabel value="standard" control={<Radio />} label="Standard" />
+                  <FormControlLabel value="apheresis" control={<Radio />} label="Apheresis" />
                 </RadioGroup>
               </TransfusionTypeFormControl>
             </Options>
@@ -399,6 +534,11 @@ export const Calculator = () => {
                     onChange={e => setPrePlateletCount(e.target.value)}
                     endAdornment={<InputAdornment position="end">000/mm<sup>3</sup></InputAdornment>}
                     aria-describedby="platelet-count"
+                    onKeyPress={(event) => {
+                        if (!/[0-9]/.test(event.key)) {
+                        event.preventDefault();
+                      }
+                    }}
                     inputProps={{
                       'aria-label': 'platelet-count',
                     }}
@@ -412,6 +552,11 @@ export const Calculator = () => {
                     onChange={e => setPostPlateletCount(e.target.value)}
                     endAdornment={<InputAdornment position="end">000/mm<sup>3</sup></InputAdornment>}
                     aria-describedby="platelet-count"
+                    onKeyPress={(event) => {
+                        if (!/[0-9]/.test(event.key)) {
+                        event.preventDefault();
+                      }
+                    }}
                     inputProps={{
                       'aria-label': 'platelet-count',
                     }}
@@ -427,6 +572,11 @@ export const Calculator = () => {
                       {personType === 'male' || personType === 'female' ? 'kg' : 'g'}
                     </InputAdornment>}
                     aria-describedby="standard-weight-helper-text"
+                    onKeyPress={(event) => {
+                        if (!/[0-9]/.test(event.key)) {
+                        event.preventDefault();
+                      }
+                    }}
                     inputProps={{
                       'aria-label': 'weight',
                     }}
@@ -440,6 +590,11 @@ export const Calculator = () => {
                     onChange={e => setHeight(e.target.value)}
                     endAdornment={<InputAdornment position="end">cm</InputAdornment>}
                     aria-describedby="standard-weight-helper-text"
+                    onKeyPress={(event) => {
+                        if (!/[0-9]/.test(event.key)) {
+                        event.preventDefault();
+                      }
+                    }}
                     inputProps={{
                       'aria-label': 'weight',
                     }}
@@ -453,6 +608,11 @@ export const Calculator = () => {
                     onChange={e => setVolume(e.target.value)}
                     endAdornment={<InputAdornment position="end">ml</InputAdornment>}
                     aria-describedby="standard-weight-helper-text"
+                    onKeyPress={(event) => {
+                        if (!/[0-9]/.test(event.key)) {
+                        event.preventDefault();
+                      }
+                    }}
                     inputProps={{
                       'aria-label': 'weight',
                     }}
@@ -462,14 +622,14 @@ export const Calculator = () => {
               </FormControlWrapper>
             </Specs>
             <Results>
-              <ResultsTitle>Results</ResultsTitle>
+              <CustomButton variant="outlined" onClick={yieldCalculateAndShow}>Calculate</CustomButton>
               <ResultsLabelAndNumber>
                 <ResultsLabel>Yield</ResultsLabel>
-                <ResultsNumber>Insufficient Data</ResultsNumber>
+                <ResultsNumber>{yieldResult ? yieldResult.toFixed(2) + " %" : '0 %'}</ResultsNumber>
               </ResultsLabelAndNumber>
               <ResultsLabelAndNumber>
                 <ResultsLabel>CCI</ResultsLabel>
-                <ResultsNumber>Insufficient Data</ResultsNumber>
+                <ResultsNumber>{cciResult ? cciResult.toFixed(3) + " /l" : '0 /l'}</ResultsNumber>
               </ResultsLabelAndNumber>
             </Results>
           </Yield>
