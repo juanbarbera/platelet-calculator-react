@@ -21,10 +21,12 @@ import CalculateIcon from '@mui/icons-material/Calculate';
 
 const Background = styled.section`
   height: 100vh;
-  width: 100vw;
+  width: 100%;
   background-color: #4045C5; 
-  font-family: 'Lato', sans-serif;
-  overflow: hidden;
+  font-family: 'Lato', sans-serif; 
+  @media (max-width: 821px) {
+    height: auto;
+  }
 `;
 
 const BrandWrapper = styled.div`
@@ -59,7 +61,7 @@ const AlbieroText = styled.div`
 `;
 
 const TabsWrapper = styled.div`
-  width: 100vw;
+  width: 100%;
   display: flex;
   justify-content: center;
   padding-top: 5vh;
@@ -100,10 +102,14 @@ const StyledTab = muistyled((props) => <Tab disableRipple {...props} />)(
 );
 
 const Display = styled.div`
-  height: 70vh;
+  height: 65vh;
   width: 100%;
   margin-top: 5vh;
   background: linear-gradient(to top, #2D39B7, #4045C5);
+  @media (max-width: 821px) {
+    height: auto;
+    padding-bottom: 5vh;
+  }
 `;
 
 // three parts of display are volume, yield, and about. Switchable through the tabs
@@ -112,11 +118,16 @@ const Display = styled.div`
 const Volume = styled.div`
   width: 80%;
   height: 85%;
-  margin: 0 10%;
+  margin: 0 auto;
   background-color: white;
   border-radius: 20px;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: none;
+  @media (max-width: 821px) {
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-columns: none;
+  }
 `;
 
 // Yield Display
@@ -128,6 +139,10 @@ const Yield = styled.div`
   background-color: white;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
+  @media (max-width: 821px) {
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-columns: none;
+  }
 `;
 
 // Common to Volume and Yield Displays
@@ -153,6 +168,7 @@ const TransfusionTypeFormControl = styled(FormControl)`
 const WeightInGrams = styled.div`
   margin-top: .5vh;
   font-size: 0.85rem;
+  margin-right: 2.5%;
 `;
 
 const Specs = styled.div`
@@ -187,6 +203,9 @@ const Results = styled.div`
 const ResultsLabelAndNumber = styled.div`
   text-align: center;
   margin: 5vh 0;
+  @media (max-width: 820px) {
+    margin: 2.5vh 0;
+  }
 `;
 
 const ResultsLabel = styled.div`
@@ -196,6 +215,7 @@ const ResultsLabel = styled.div`
 
 const ResultsNumber = styled.div`
   margin-top: 2.5vh;
+  font-size: 2rem;
 `;
 
 // About Display
@@ -203,14 +223,18 @@ const About = styled.div`
   position: relative;
   left: 50%;
   transform: translateX(-50%);
-  width: 50%;
+  width: 80%;
   height: 85%;
   border-radius: 20px;
   background-color: white;
   padding: 5vh 2.5vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: space-between;
+  @media (max-width: 821px) {
+      width: 80%;
+      height: 100vh;
+    }
 `;
 
 const AboutText = styled.div`
@@ -228,11 +252,15 @@ const CustomButton = styled(Button)`
   && {
     color: black;
     border-color: black;
+    margin-top: 3.5vh;
     margin-bottom: 5vh;
     :hover {
       color: black;
       border-color: black;
       background-color: rgba(0,0,0,0.025);
+    }
+    @media (max-width: 821px) {
+      margin-top: 5vh;
     }
   }
 `;
@@ -483,11 +511,11 @@ export const Calculator = () => {
               <CustomButton variant="outlined" onClick={volumeCalculateAndShow}>Calculate</CustomButton>
               <ResultsLabelAndNumber>
                 <ResultsLabel>Standard/Randomized</ResultsLabel>
-                <ResultsNumber>{standardResult ? standardResult.toFixed(2) + " ml" : '0 ml'}</ResultsNumber>
+                <ResultsNumber>{standardResult ? standardResult.toFixed(0) + " ml" : '0 ml'}</ResultsNumber>
               </ResultsLabelAndNumber>
               <ResultsLabelAndNumber>
                 <ResultsLabel>Apheresis/Buffy Coat/Pool</ResultsLabel>
-                <ResultsNumber>{apheresisResult ? apheresisResult.toFixed(2) + " ml" : '0 ml'}</ResultsNumber>
+                <ResultsNumber>{apheresisResult ? apheresisResult.toFixed(0) + " ml" : '0 ml'}</ResultsNumber>
               </ResultsLabelAndNumber>              
             </Results>
           </Volume>
@@ -625,7 +653,7 @@ export const Calculator = () => {
               <CustomButton variant="outlined" onClick={yieldCalculateAndShow}>Calculate</CustomButton>
               <ResultsLabelAndNumber>
                 <ResultsLabel>Yield</ResultsLabel>
-                <ResultsNumber>{yieldResult ? yieldResult.toFixed(2) + " %" : '0 %'}</ResultsNumber>
+                <ResultsNumber>{yieldResult ? yieldResult.toFixed(0) + " %" : '0 %'}</ResultsNumber>
               </ResultsLabelAndNumber>
               <ResultsLabelAndNumber>
                 <ResultsLabel>CCI</ResultsLabel>
