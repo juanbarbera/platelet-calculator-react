@@ -23,7 +23,8 @@ const Background = styled.section`
   height: 100vh;
   width: 100%;
   background-color: #4045C5; 
-  font-family: 'Lato', sans-serif; 
+  font-family: 'Lato', sans-serif;
+  overflow: hidden;
   @media (max-width: 821px) {
     height: auto;
   }
@@ -102,7 +103,7 @@ const StyledTab = muistyled((props) => <Tab disableRipple {...props} />)(
 );
 
 const Display = styled.div`
-  height: 65vh;
+  height: 70vh;
   width: 100%;
   margin-top: 5vh;
   background: linear-gradient(to top, #2D39B7, #4045C5);
